@@ -1,0 +1,5 @@
+{
+  "name": "Nexus Chat",
+  "description": "A modern, responsive, and real-time chat web application where users can temporarily create a profile (username, gender, age) and start chatting with others in both group chats and private chats.",
+  "requestFramePermissions": []
+}
