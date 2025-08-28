@@ -4,7 +4,6 @@ import type { User, Message, ChatContextType, ActiveChat } from '../types';
 // The 'io' function is globally available from the script tag in index.html
 // @ts-ignore
 const socket = io("https://nexuschat-7bqr.onrender.com", {
-    autoConnect: false,
     reconnection: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,

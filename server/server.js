@@ -9,7 +9,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "https://nexuschatweb.netlify.app/", // Allow all origins for this example
+        origin: "https://nexuschatweb.netlify.app", // Allow all origins for this example
         methods: ["GET", "POST"]
     }
 });
