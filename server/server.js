@@ -9,7 +9,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "*", // Allow all origins for this example
+        origin: "https://nexuschatweb.netlify.app/", // Allow all origins for this example
         methods: ["GET", "POST"]
     }
 });
@@ -58,7 +58,7 @@ io.on('connection', (socket) => {
             socket.emit('loginError', 'This username is already taken.');
             return;
         }
-        
+
         const currentUser = {
             id: `user-${Date.now()}`,
             username,
@@ -68,7 +68,7 @@ io.on('connection', (socket) => {
             socketId: socket.id,
         };
         users.push(currentUser);
-        
+
         socket.userId = currentUser.id;
 
         // Join the global room
@@ -88,7 +88,7 @@ io.on('connection', (socket) => {
             globalMessages,
             privateMessages: userPrivateMessages,
         });
-        
+
         io.emit('usersUpdate', users);
         console.log(`User logged in: ${currentUser.username} (${currentUser.id})`);
     });
@@ -113,9 +113,9 @@ io.on('connection', (socket) => {
                     privateMessages[chatKey] = [];
                 }
                 privateMessages[chatKey].push(message);
-                
+
                 // Emit to recipient if they are online
-                if(recipient.socketId) {
+                if (recipient.socketId) {
                     io.to(recipient.socketId).emit('newMessage', message);
                 }
                 // Emit back to sender
@@ -161,9 +161,9 @@ io.on('connection', (socket) => {
         if (!socket.userId) return;
 
         const { message: messageToUpdate } = findMessage(messageId);
-        
+
         if (!messageToUpdate) return;
-        
+
         // Don't mark own messages as read or re-mark as read
         if (messageToUpdate.senderId === socket.userId || messageToUpdate.readBy.includes(socket.userId)) {
             return;
@@ -184,10 +184,10 @@ io.on('connection', (socket) => {
 
         const { message: messageToUpdate } = findMessage(messageId);
         if (!messageToUpdate) return;
-        
+
         const reactorId = socket.userId;
         const reactions = messageToUpdate.reactions || {};
-        
+
         // Ensure the emoji key exists
         if (!reactions[emoji]) {
             reactions[emoji] = [];
@@ -231,7 +231,7 @@ io.on('connection', (socket) => {
         if (!sender) return;
 
         const payload = { chatId, username: sender.username };
-        
+
         if (chatId === 'global') {
             socket.broadcast.to('global').emit('typingStarted', payload);
         } else {

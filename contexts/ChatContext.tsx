@@ -3,7 +3,7 @@ import type { User, Message, ChatContextType, ActiveChat } from '../types';
 
 // The 'io' function is globally available from the script tag in index.html
 // @ts-ignore
-const socket = io("http://localhost:3001", {
+const socket = io("https://nexuschat-7bqr.onrender.com", {
     autoConnect: false,
     reconnection: true,
     reconnectionAttempts: 5,
@@ -63,7 +63,7 @@ const chatReducer = (state: State, action: Action): State => {
         case 'SET_ACTIVE_CHAT': {
             const chat = action.payload;
             const newUnreadCounts = { ...state.unreadCounts };
-            
+
             const chatId = chat?.type === 'global' ? 'global' : chat?.userId;
             if (chatId) {
                 delete newUnreadCounts[chatId];
@@ -76,7 +76,7 @@ const chatReducer = (state: State, action: Action): State => {
             // Global Message
             if (msg.recipientId === 'global') {
                 if (state.globalMessages.some(m => m.id === msg.id)) return state; // Avoid duplicates
-                
+
                 const isChatActive = state.activeChat?.type === 'global';
                 const newUnreadCounts = { ...state.unreadCounts };
                 if (!isChatActive && msg.senderId !== state.currentUser?.id) {
@@ -84,15 +84,15 @@ const chatReducer = (state: State, action: Action): State => {
                 }
 
                 return { ...state, globalMessages: [...state.globalMessages, msg], unreadCounts: newUnreadCounts };
-            } 
+            }
             // Private Message
             else {
-                 const partnerId = msg.senderId === state.currentUser?.id ? msg.recipientId : msg.senderId;
+                const partnerId = msg.senderId === state.currentUser?.id ? msg.recipientId : msg.senderId;
                 const newPrivateMessages = { ...state.privateMessages };
                 const partnerMessages = newPrivateMessages[partnerId] || [];
                 if (partnerMessages.some(m => m.id === msg.id)) return state; // Avoid duplicates
                 newPrivateMessages[partnerId] = [...partnerMessages, msg];
-                
+
                 const isChatActive = state.activeChat?.type === 'private' && state.activeChat.userId === partnerId;
                 const newUnreadCounts = { ...state.unreadCounts };
                 if (!isChatActive && msg.senderId !== state.currentUser?.id) {
@@ -210,17 +210,17 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         const handleConnect = () => dispatch({ type: 'SET_CONNECTION_STATUS', payload: true });
         const handleDisconnect = () => dispatch({ type: 'SET_CONNECTION_STATUS', payload: false });
-        
+
         const handleNewMessage = (message: Message) => {
             const { currentUser, activeChat } = stateRef.current;
-            
+
             if (!currentUser) {
-                 dispatch({ type: 'ADD_MESSAGE', payload: message });
-                 return;
+                dispatch({ type: 'ADD_MESSAGE', payload: message });
+                return;
             }
-            
+
             const isMyMessage = message.senderId === currentUser.id;
-            
+
             let isChatActive = false;
             if (activeChat) {
                 if (message.recipientId === 'global') {
@@ -237,7 +237,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             dispatch({ type: 'ADD_MESSAGE', payload: message });
         };
-        
+
         const handleMessageEdited = (message: Message) => dispatch({ type: 'MESSAGE_EDITED', payload: message });
         const handleMessageReadUpdate = (message: Message) => dispatch({ type: 'MESSAGE_READ_UPDATE', payload: message });
         const handleMessageReactionUpdate = (message: Message) => dispatch({ type: 'MESSAGE_REACTION_UPDATE', payload: message });
@@ -254,7 +254,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         socket.on('usersUpdate', handleUsersUpdate);
         socket.on('typingStarted', handleTypingStarted);
         socket.on('typingStopped', handleTypingStopped);
-        
+
         return () => {
             socket.off('connect', handleConnect);
             socket.off('disconnect', handleDisconnect);
@@ -285,13 +285,13 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 socket.off('loginSuccess'); // Clean up success listener
                 reject(new Error(error));
             });
-            
+
             socket.emit('login', { username, gender, age });
         });
     }, []);
 
     const logout = useCallback(() => {
-        if(socket.connected) {
+        if (socket.connected) {
             socket.disconnect();
         }
         dispatch({ type: 'LOGOUT' });
@@ -300,7 +300,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const sendMessage = useCallback((text: string) => {
         if (!state.currentUser || !socket.connected || !state.activeChat) return;
-        
+
         const recipientId = state.activeChat.type === 'global' ? 'global' : state.activeChat.userId;
         socket.emit('sendMessage', { text, recipientId });
     }, [state.currentUser, state.activeChat]);
